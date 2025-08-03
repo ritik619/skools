@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserRoleModule } from './user-role/user-role.module';
@@ -19,7 +21,42 @@ import { CountryModule } from './country/country.module';
 import { OrgnaizationModule } from './orgnaization/orgnaization.module';
 
 @Module({
-  imports: [AuthModule,OrgnaizationModule, CountryModule, CityModule, StateModule, SchoolModule, AcademicYearModule, GradeModule, SectionModule, RoomModule, SchoolDocumentModule, DocumentTemplateModule, UserModule, UserRoleHierarchyModule, UserRelationshipModule, UserRoleModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('DB_HOST', 'localhost'),
+        port: configService.get('DB_PORT', 5432),
+        username: configService.get('DB_USERNAME', 'postgres'),
+        password: configService.get('DB_PASSWORD', 'password'),
+        database: configService.get('DB_NAME', 'skools'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: configService.get('NODE_ENV') !== 'production',
+        logging: configService.get('NODE_ENV') !== 'production',
+      }),
+      inject: [ConfigService],
+    }),
+    AuthModule,
+    OrgnaizationModule, 
+    CountryModule, 
+    CityModule, 
+    StateModule, 
+    SchoolModule, 
+    AcademicYearModule, 
+    GradeModule, 
+    SectionModule, 
+    RoomModule, 
+    SchoolDocumentModule, 
+    DocumentTemplateModule, 
+    UserModule, 
+    UserRoleHierarchyModule, 
+    UserRelationshipModule, 
+    UserRoleModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
