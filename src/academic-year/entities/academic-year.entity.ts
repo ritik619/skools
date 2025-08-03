@@ -1,4 +1,3 @@
-import { Grade } from 'src/grade/entities/grade.entity';
 import { School } from 'src/school/entities/school.entity';
 import { Section } from 'src/section/entities/section.entity';
 import {

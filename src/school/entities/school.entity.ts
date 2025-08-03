@@ -2,6 +2,7 @@ import { AcademicYear } from 'src/academic-year/entities/academic-year.entity';
 import { City } from 'src/city/entities/city.entity';
 import { Grade } from 'src/grade/entities/grade.entity';
 import { Room } from 'src/room/entities/room.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -59,6 +60,10 @@ export class School {
 
   @OneToMany(() => Room, (room) => room.school)
   rooms: Room[];
+
+  // Add to School entity
+  @OneToMany(() => User, (user) => user.school)
+  users: User[];
 
   @Column()
   capacity: number;
