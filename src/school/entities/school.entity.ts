@@ -2,6 +2,7 @@ import { AcademicYear } from 'src/academic-year/entities/academic-year.entity';
 import { City } from 'src/city/entities/city.entity';
 import { Grade } from 'src/grade/entities/grade.entity';
 import { Room } from 'src/room/entities/room.entity';
+import { SchoolDocument } from 'src/school-document/entities/school-document.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
@@ -57,6 +58,10 @@ export class School {
   // Add this property to the School class
   @OneToMany(() => Grade, (grade) => grade.school)
   grades: Grade[];
+  // Add this property to the School class
+  
+  @OneToMany(() => SchoolDocument, (document) => document.school)
+  documents: SchoolDocument[];
 
   @OneToMany(() => Room, (room) => room.school)
   rooms: Room[];

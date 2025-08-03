@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { SchoolDocument } from 'src/school-document/entities/school-document.entity';
 
 export enum DocumentCategory {
   LEGAL = 'Legal',
@@ -58,6 +60,10 @@ export class DocumentTemplate {
 
   @Column()
   documentCategory: DocumentCategory;
+
+  // Add relationship to SchoolDocument
+  @OneToMany(() => SchoolDocument, (schoolDocument) => schoolDocument.documentTemplate)
+  schoolDocuments: SchoolDocument[];
 
   @CreateDateColumn()
   createdAt: Date;

@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User, UserTypeEnum } from 'src/user/entities/user.entity';
+import { School } from 'src/school/entities/school.entity';
 
 @Entity()
 export class UserRole {
