@@ -3,6 +3,8 @@ import { SchoolService } from './school.service';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { UpdateSchoolDto } from './dto/update-school.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { SchoolFilterDto } from 'src/common/dto/filter.dto';
 
 @Controller('schools')
 @UseGuards(JwtAuthGuard)
@@ -15,11 +17,8 @@ export class SchoolController {
   }
 
   @Get()
-  findAll(@Query('cityId') cityId?: string) {
-    if (cityId) {
-      return this.schoolService.findByCity(cityId);
-    }
-    return this.schoolService.findAll();
+  findAll(@Query() paginationDto: PaginationDto, @Query() filters: SchoolFilterDto) {
+    return this.schoolService.findAll(paginationDto, filters);
   }
 
   @Get(':id')
@@ -28,23 +27,23 @@ export class SchoolController {
   }
 
   @Get(':id/grades')
-  findGrades(@Param('id', ParseUUIDPipe) id: string) {
-    return this.schoolService.findGrades(id);
+  findGrades(@Param('id', ParseUUIDPipe) id: string, @Query() paginationDto: PaginationDto) {
+    return this.schoolService.findGrades(id, paginationDto);
   }
 
   @Get(':id/rooms')
-  findRooms(@Param('id', ParseUUIDPipe) id: string) {
-    return this.schoolService.findRooms(id);
+  findRooms(@Param('id', ParseUUIDPipe) id: string, @Query() paginationDto: PaginationDto) {
+    return this.schoolService.findRooms(id, paginationDto);
   }
 
   @Get(':id/academic-years')
-  findAcademicYears(@Param('id', ParseUUIDPipe) id: string) {
-    return this.schoolService.findAcademicYears(id);
+  findAcademicYears(@Param('id', ParseUUIDPipe) id: string, @Query() paginationDto: PaginationDto) {
+    return this.schoolService.findAcademicYears(id, paginationDto);
   }
 
   @Get(':id/users')
-  findUsers(@Param('id', ParseUUIDPipe) id: string) {
-    return this.schoolService.findUsers(id);
+  findUsers(@Param('id', ParseUUIDPipe) id: string, @Query() paginationDto: PaginationDto) {
+    return this.schoolService.findUsers(id, paginationDto);
   }
 
   @Patch(':id')

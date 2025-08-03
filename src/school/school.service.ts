@@ -1,9 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { UpdateSchoolDto } from './dto/update-school.dto';
 import { School } from './entities/school.entity';
+import { PaginationDto, PaginationResponseDto } from 'src/common/dto/pagination.dto';
+import { SchoolFilterDto } from 'src/common/dto/filter.dto';
+import { PaginationService } from 'src/common/services/pagination.service';
 
 @Injectable()
 export class SchoolService {
@@ -17,17 +20,48 @@ export class SchoolService {
     return await this.schoolRepository.save(school);
   }
 
-  async findAll() {
-    return await this.schoolRepository.find({
-      relations: ['city', 'city.state', 'city.state.country'],
-    });
+  async findAll(paginationDto: PaginationDto, filters: SchoolFilterDto): Promise<PaginationResponseDto<School>> {
+    const queryBuilder = this.schoolRepository
+      .createQueryBuilder('school')
+      .leftJoinAndSelect('school.city', 'city')
+      .leftJoinAndSelect('city.state', 'state')
+      .leftJoinAndSelect('state.country', 'country');
+
+    // Apply filters
+    if (filters.cityId) {
+      queryBuilder.andWhere('school.cityId = :cityId', { cityId: filters.cityId });
+    }
+
+    if (filters.stateId) {
+      queryBuilder.andWhere('city.stateId = :stateId', { stateId: filters.stateId });
+    }
+
+    if (filters.countryId) {
+      queryBuilder.andWhere('state.countryId = :countryId', { countryId: filters.countryId });
+    }
+
+    if (filters.isActive !== undefined) {
+      queryBuilder.andWhere('school.isActive = :isActive', { isActive: filters.isActive });
+    }
+
+    if (filters.educationBoard) {
+      queryBuilder.andWhere('school.educationBoard ILIKE :educationBoard', { 
+        educationBoard: `%${filters.educationBoard}%` 
+      });
+    }
+
+    return await PaginationService.paginate(queryBuilder, paginationDto);
   }
 
-  async findByCity(cityId: string) {
-    return await this.schoolRepository.find({
-      where: { cityId },
-      relations: ['city', 'city.state', 'city.state.country'],
-    });
+  async findByCity(cityId: string, paginationDto: PaginationDto): Promise<PaginationResponseDto<School>> {
+    const queryBuilder = this.schoolRepository
+      .createQueryBuilder('school')
+      .leftJoinAndSelect('school.city', 'city')
+      .leftJoinAndSelect('city.state', 'state')
+      .leftJoinAndSelect('state.country', 'country')
+      .where('school.cityId = :cityId', { cityId });
+
+    return await PaginationService.paginate(queryBuilder, paginationDto);
   }
 
   async findOne(id: string) {
@@ -43,56 +77,48 @@ export class SchoolService {
     return school;
   }
 
-  async findGrades(id: string) {
-    const school = await this.schoolRepository.findOne({
-      where: { schoolId: id },
-      relations: ['grades'],
-    });
+  async findGrades(id: string, paginationDto: PaginationDto): Promise<PaginationResponseDto<any>> {
+    const school = await this.findOne(id);
+    
+    const queryBuilder = this.schoolRepository
+      .createQueryBuilder('school')
+      .leftJoinAndSelect('school.grades', 'grades')
+      .where('school.schoolId = :schoolId', { schoolId: id });
 
-    if (!school) {
-      throw new NotFoundException(`School with ID ${id} not found`);
-    }
-
-    return school.grades;
+    return await PaginationService.paginate(queryBuilder, paginationDto);
   }
 
-  async findRooms(id: string) {
-    const school = await this.schoolRepository.findOne({
-      where: { schoolId: id },
-      relations: ['rooms'],
-    });
+  async findRooms(id: string, paginationDto: PaginationDto): Promise<PaginationResponseDto<any>> {
+    const school = await this.findOne(id);
+    
+    const queryBuilder = this.schoolRepository
+      .createQueryBuilder('school')
+      .leftJoinAndSelect('school.rooms', 'rooms')
+      .where('school.schoolId = :schoolId', { schoolId: id });
 
-    if (!school) {
-      throw new NotFoundException(`School with ID ${id} not found`);
-    }
-
-    return school.rooms;
+    return await PaginationService.paginate(queryBuilder, paginationDto);
   }
 
-  async findAcademicYears(id: string) {
-    const school = await this.schoolRepository.findOne({
-      where: { schoolId: id },
-      relations: ['academicYears'],
-    });
+  async findAcademicYears(id: string, paginationDto: PaginationDto): Promise<PaginationResponseDto<any>> {
+    const school = await this.findOne(id);
+    
+    const queryBuilder = this.schoolRepository
+      .createQueryBuilder('school')
+      .leftJoinAndSelect('school.academicYears', 'academicYears')
+      .where('school.schoolId = :schoolId', { schoolId: id });
 
-    if (!school) {
-      throw new NotFoundException(`School with ID ${id} not found`);
-    }
-
-    return school.academicYears;
+    return await PaginationService.paginate(queryBuilder, paginationDto);
   }
 
-  async findUsers(id: string) {
-    const school = await this.schoolRepository.findOne({
-      where: { schoolId: id },
-      relations: ['users'],
-    });
+  async findUsers(id: string, paginationDto: PaginationDto): Promise<PaginationResponseDto<any>> {
+    const school = await this.findOne(id);
+    
+    const queryBuilder = this.schoolRepository
+      .createQueryBuilder('school')
+      .leftJoinAndSelect('school.users', 'users')
+      .where('school.schoolId = :schoolId', { schoolId: id });
 
-    if (!school) {
-      throw new NotFoundException(`School with ID ${id} not found`);
-    }
-
-    return school.users;
+    return await PaginationService.paginate(queryBuilder, paginationDto);
   }
 
   async update(id: string, updateSchoolDto: UpdateSchoolDto) {
